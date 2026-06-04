@@ -1,0 +1,289 @@
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#f4f3ef;color:#1a1916;font-size:14px;}
+.hdr{background:#1a1916;color:#fff;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;}
+.hdr-logo{font-size:14px;font-weight:600;}
+.hdr-sub{color:#a8a39a;font-weight:400;}
+.sync{display:flex;align-items:center;gap:7px;font-size:11px;color:#a8a39a;}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#4ade80;}
+.wrap{max-width:1280px;margin:0 auto;padding:20px 16px;}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
+.filters input,.filters select{padding:8px 11px;border-radius:8px;border:1px solid #e0dbd3;background:#fff;color:#1a1916;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;}
+.filters input{flex:1;min-width:160px;}
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-bottom:20px;}
+.sum-card{background:#fff;border:1px solid #e0dbd3;border-radius:12px;padding:14px 16px;}
+.sum-lbl{font-size:10px;color:#9e9b94;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+.sum-val{font-size:20px;font-weight:500;letter-spacing:-.4px;}
+.sum-sub{font-size:11px;color:#9e9b94;margin-top:2px;}
+.k-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:9px;margin-bottom:20px;}
+.kcard{background:#fff;border:1px solid #e0dbd3;border-radius:12px;padding:14px 16px;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.kcard:hover,.kcard.sel{border-color:#1a1916;box-shadow:0 2px 12px rgba(0,0,0,.09);}
+.kname{font-size:13px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;justify-content:space-between;gap:4px;}
+.ktot{font-size:20px;font-weight:500;letter-spacing:-.4px;margin:6px 0 2px;}
+.ksub{font-size:11px;color:#9e9b94;}
+.kbar-wrap{display:flex;align-items:center;gap:6px;margin:8px 0 7px;}
+.kbar-bg{flex:1;height:3px;background:#f0ede8;border-radius:2px;}
+.kbar-fill{height:3px;border-radius:2px;background:#1a1916;}
+.pills{display:flex;gap:4px;flex-wrap:wrap;}
+.pill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;}
+.pill-r{background:#eff6ff;color:#2563eb;}
+.pill-u{background:#f0fdf4;color:#059669;}
+.pill-w{background:#f3f0ff;color:#7c3aed;}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;}
+.bg{background:#dcfce7;color:#16a34a;}
+.ba{background:#fef3c7;color:#d97706;}
+.br{background:#fee2e2;color:#dc2626;}
+.bn{background:#f3f4f6;color:#9ca3af;}
+.panel{background:#fff;border:1px solid #e0dbd3;border-radius:12px;margin-bottom:20px;overflow:hidden;}
+.panel-hdr{background:#1a1916;color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px;}
+.panel-hdr h2{font-size:15px;font-weight:600;}
+.close{margin-left:auto;background:rgba(255,255,255,.12);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;}
+.dtabs{display:flex;border-bottom:1px solid #e0dbd3;padding:0 20px;background:#f9f8f5;overflow-x:auto;}
+.dtab{padding:10px 13px;font-size:12px;cursor:pointer;border:none;border-bottom:2px solid transparent;color:#9e9b94;background:none;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;}
+.dtab.on{color:#1a1916;border-bottom-color:#1a1916;font-weight:500;}
+.dbody{padding:18px 20px;}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;}
+@media(max-width:600px){.dg{grid-template-columns:1fr;}}
+.erow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0ede8;font-size:13px;}
+.erow:last-child{border-bottom:none;}
+.elbl{color:#6b6860;}
+.eval{font-weight:500;font-family:'DM Mono',monospace;font-size:12px;}
+.total-line{display:flex;justify-content:space-between;padding:9px 0 0;font-size:14px;font-weight:600;border-top:2px solid #e0dbd3;margin-top:3px;}
+.tbl-wrap{overflow-x:auto;margin-top:6px;}
+.dtbl{width:100%;border-collapse:collapse;font-size:11px;font-family:'DM Mono',monospace;}
+.dtbl th{text-align:center;font-size:10px;color:#9e9b94;padding:5px 6px;border-bottom:1px solid #e0dbd3;font-family:'DM Sans',sans-serif;font-weight:500;white-space:nowrap;}
+.dtbl th:first-child{text-align:left;}
+.dtbl td{text-align:right;padding:6px 6px;border-bottom:1px solid #f0ede8;color:#6b6860;white-space:nowrap;}
+.dtbl td:first-child{text-align:left;font-family:'DM Sans',sans-serif;font-size:11px;}
+.dtbl .hi{background:#eff6ff;color:#2563eb;font-weight:600;}
+.dtbl .z{color:#d1d5db;}
+.dtbl tfoot td{font-weight:600;border-top:2px solid #e0dbd3;color:#1a1916;}
+.ws-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0ede8;font-size:13px;}
+.ws-row:last-child{border-bottom:none;}
+.no-data{font-size:12px;color:#9e9b94;padding:6px 0;}
+.sec-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#9e9b94;margin:14px 0 7px;}
+.sec-lbl:first-child{margin-top:0;}
+.chart-wrap{position:relative;width:100%;height:190px;}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:#6b6860;margin-bottom:8px;}
+.leg-sq{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:3px;vertical-align:middle;}
+footer{text-align:center;font-size:11px;color:#9e9b94;border-top:1px solid #e0dbd3;padding:14px 0;margin-top:8px;}
+</style>
+
+<div class="hdr">
+  <div class="hdr-logo">Kitchen Expenses <span class="hdr-sub">/ Property Dashboard</span></div>
+  <div class="sync"><div class="dot"></div><span id="stxt">Data loaded from Google Sheet</span></div>
+</div>
+
+<div class="wrap">
+  <div class="filters">
+    <span style="font-size:12px;color:#9e9b94;white-space:nowrap">Filter:</span>
+    <input id="srch" placeholder="Search kitchen…" oninput="render()">
+    <select id="msel" onchange="render()">
+      <option value="0">Jan 2026</option><option value="1">Feb 2026</option><option value="2">Mar 2026</option>
+      <option value="3">Apr 2026</option><option value="4" selected>May 2026</option><option value="5">Jun 2026</option>
+      <option value="6">Jul 2026</option><option value="7">Aug 2026</option><option value="8">Sep 2026</option>
+      <option value="9">Oct 2026</option><option value="10">Nov 2026</option><option value="11">Dec 2026</option>
+    </select>
+    <select id="ssel" onchange="render()">
+      <option value="d">Highest first</option>
+      <option value="a">Lowest first</option>
+      <option value="z">A → Z</option>
+    </select>
+  </div>
+  <div class="sum-grid" id="sums"></div>
+  <div id="panel" style="display:none"></div>
+  <div class="k-grid" id="grid"></div>
+  <footer>Data sourced from Google Sheet · Last updated: May 2026</footer>
+</div>
+
+<script>
+const MO  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MOF = ['Jan 2026','Feb 2026','Mar 2026','Apr 2026','May 2026','Jun 2026','Jul 2026','Aug 2026','Sep 2026','Oct 2026','Nov 2026','Dec 2026'];
+const WC  = {'Juhu':2500,'Marol L&L':1200,'Marol Office':800,'Malad':1600,'Dahisar':600,'Borivali':700,'Vashi':900,'Vasant Vihar':700,'Mira Road':500,'BKC':1500,'Chembur':600,'Gamdevi/Marine':600,'Mulund':800,'Sion':600,'Goregaon':700,'Hiranandani Thane':800,'Worli':1200,'Pune - Kalyani Nagar':700,'Powai':900,'Kharadi':600,'Andheri':800,'Kandivali':700,'Sakinaka':500};
+
+// ── LIVE DATA from Google Sheet (read on: 30 May 2026) ────────────────────────
+const DATA = [
+  {name:'Andheri',        rent:{tenant:'Kiran & Yash Toraskar',     status:'Active',    months:[40000,43000,43000,43000,43000,43000,43000,43000,43000,43000,43000,43000]}, utility:[{label:'Adani',           months:[46120,53040,51200,50440,0,0,0,0,0,0,0,0]}],                                                                        wifi:[{vendor:'Shadab Abdulaziz Shaikh',due:'2026-04-18'}],                              sim:[{number:'8425996054',provider:'Vodafone',due:'2026-07-09'}]},
+  {name:'BKC',            rent:{tenant:'Mukesh Gupta',              status:'Active',    months:[93220,93220,93220,93220,93220,93220,93220,93220,93220,93220,93220,93220]},  utility:[{label:'Adani',           months:[87040,88450,106810,99800,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'TENG Network Solution',  due:'2026-10-04'}],                              sim:[{number:'8657887841',provider:'Vodafone',due:'2027-03-22'}]},
+  {name:'Baner',          rent:{tenant:'Sagar Vilas Shinde',        status:'Active',    months:[0,0,0,0,84333,110000,110000,110000,110000,110000,110000,110000]},           utility:[],                                                                                                                                                  wifi:[],                                                                                 sim:[]},
+  {name:'Borivali',       rent:{tenant:'Anand K Shroff',            status:'Active',    months:[0,0,0,27500,55000,55000,55000,55000,55000,55000,55000,55000]},              utility:[{label:'',                months:[0,0,0,850,0,0,0,0,0,0,0,0]}],                                                                                     wifi:[],                                                                                 sim:[{number:'7208147982',provider:'Airtel',due:'2027-02-26'},{number:'7304122132',provider:'Airtel',due:'2027-05-11'}]},
+  {name:'Chembur',        rent:{tenant:'Lalita Bhatla & Ajay Tyagi',status:'Active',    months:[75000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000,150000]},utility:[{label:'Adani',   months:[36390,0,0,0,0,0,0,0,0,0,0,0]},{label:'Staff Room',months:[1690,1070,0,1130,0,0,0,0,0,0,0,0]}],                    wifi:[{vendor:'Maa Laxmi Internet',     due:'2026-06-22'}],                              sim:[{number:'8976343966',provider:'Airtel',due:'2027-02-18'}]},
+  {name:'D N Nagar',      rent:{tenant:'Yogesh Harish Bulchandani', status:'Active',    months:[0,0,0,0,77500,155000,155000,155000,155000,155000,155000,155000]},           utility:[{label:'',                months:[0,0,0,417,0,0,0,0,0,0,0,0]}],                                                                                     wifi:[],                                                                                 sim:[]},
+  {name:'Dahisar',        rent:{tenant:'Sanjay & Saroj Yadav',      status:'Future',    months:[39900,39900,39900,39900,39900,39900,41900,41900,41900,41900,41900,41900]},  utility:[{label:'Adani',           months:[35620,34250,33720,36080,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'United Cable Service',   due:'2026-07-30'}],                              sim:[{number:'9082765285',provider:'Jio',due:'2026-07-09'}]},
+  {name:'Gamdevi/Marine', rent:null,                                                    utility:[{label:'Best',            months:[156660,4210,81690,83490,87650,0,0,0,0,0,0,0]}],                                                                                    wifi:[],                                                                                 sim:[{number:'9769513145',provider:'Vodafone',due:'2026-04-24'}]},
+  {name:'Goregaon',       rent:{tenant:'Chhaganraj & Manju Solanki',status:'Active',   months:[88000,88000,88000,88000,88000,88000,88000,89363,91250,91250,91250,91250]},   utility:[{label:'Adani',           months:[59300,56100,64020,61230,0,0,0,0,0,0,0,0]},{label:'Staff',months:[0,6630,0,0,0,0,0,0,0,0,0,0]}],                  wifi:[{vendor:'Jio',                    due:'2027-02-07'}],                              sim:[{number:'9082635923',provider:'JIO',due:'2026-11-06'}]},
+  {name:'Grant Road',     rent:{tenant:'Nish Indo',                 status:'Future',    months:[107000,107000,107000,107000,107000,107000,107000,107000,107000,107000,107000,107000]},utility:[],                                                                                                                                         wifi:[],                                                                                 sim:[]},
+  {name:'Hiranandani Thane',rent:{tenant:'Chetan & Neeta Ankhad',   status:'Future',   months:[57000,57000,57000,57000,57000,57000,57000,57000,58710,59850,59850,59850]},   utility:[{label:'Mahavitran',      months:[14690,13685,13685,21340,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'Reliance Juhu',          due:'2026-09-22'}],                              sim:[{number:'8433798909',provider:'Airtel',due:'2025-11-16'}]},
+  {name:'Juhu',           rent:{tenant:'Multiple tenants',          status:'Active',    months:[137906,158126,165766,163776,159956,155135,129956,129956,129956,129956,86100,86100]},utility:[{label:'Adani (39)',months:[29940,24790,26740,27370,0,0,0,0,0,0,0,0]},{label:'Adani (41)',months:[35350,30540,38230,34120,0,0,0,0,0,0,0,0]},{label:'Adani (45)',months:[20220,27860,23820,26630,0,0,0,0,0,0,0,0]}],wifi:[{vendor:'Shahrukh Vision (39)',due:'2026-02-26'},{vendor:'Shahrukh Vision (45)',due:'2026-05-28'}],sim:[{number:'7841929375',provider:'Airtel',due:'2027-01-18'}]},
+  {name:'Kandivali',      rent:{tenant:'Lokesh Naidu',              status:'Active',    months:[80000,80000,80000,80000,80000,80000,80000,80000,80000,80516,84000,84000]},   utility:[{label:'Tata',            months:[12269,15876,25251,28334,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'Virendra Dhuriya',       due:'2026-07-16'}],                              sim:[{number:'9137771506',provider:'JIO',due:'2027-04-26'}]},
+  {name:'Kharadi',        rent:{tenant:'Suvarna Kadadi & Patil',    status:'Active',    months:[0,25000,30000,30000,30000,30000,30000,30000,30000,30000,30000,30000]},       utility:[{label:'Mahavitran',      months:[1000,1350,5660,17280,0,0,0,0,0,0,0,0]}],                                                                          wifi:[{vendor:'Sanket Bhosale',         due:'2026-06-24'}],                              sim:[{number:'7709599619',provider:'Airtel',due:'2027-03-16'}]},
+  {name:'Malad',          rent:{tenant:'Hemant Garodia / Rudolph',  status:'Future',    months:[121283,121950,121950,121950,121950,121950,121950,121950,121950,124950,124950,124950]},utility:[{label:'Tata (115)',months:[42920,43635,41789,34877,0,0,0,0,0,0,0,0]},{label:'Tata (116)',months:[25534,26462,29756,35232,0,0,0,0,0,0,0,0]}],wifi:[{vendor:'Jio-2231828787',due:'2026-08-10'}],sim:[{number:'9137771506',provider:'JIO',due:'2027-04-26'}]},
+  {name:'Marol L&L',      rent:{tenant:'Jatinder Kaur',             status:'Active',    months:[68907,68907,68907,68907,68907,68907,68907,68907,68907,68907,0,0]},          utility:[{label:'Tata (L&L)',      months:[93040,90346,105733,103072,0,0,0,0,0,0,0,0]}],                                                                      wifi:[{vendor:'You Broadband India',    due:'2026-09-09'}],                              sim:[{number:'9819232450',provider:'Vodafone',due:'2026-12-02'}]},
+  {name:'Marol Office',   rent:{tenant:'Ptravin Madia',             status:'Future',    months:[100000,100000,100000,100000,100000,100000,100000,100000,103333,105000,105000,105000]},utility:[{label:'Tata (44-45)',months:[4378,5629,7684,9309,0,0,0,0,0,0,0,0]},{label:'Tata (45)',months:[2263,4000,0,7430,0,0,0,0,0,0,0,0]}],       wifi:[],                                                                                 sim:[]},
+  {name:'Mira Road',      rent:{tenant:'Rekha Shetty & Mallika Rai',status:'Active',   months:[41734,42000,42000,42000,42000,42000,42000,42000,42000,42000,42000,42000]},    utility:[{label:'Adani',           months:[34560,31850,35700,25540,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'Airtel',                 due:'2026-03-31'}],                              sim:[{number:'7977071511',provider:'Jio',due:'2026-07-09'}]},
+  {name:'Mulund',         rent:{tenant:'Manani Manoj',              status:'Future',    months:[44000,44000,44000,44426,46200,46200,46200,46200,46200,46200,46200,46200]},   utility:[{label:'Mahavitran',      months:[47810,45660,39280,40330,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'Infocus Networks',       due:'2026-10-29'}],                              sim:[{number:'7718845382',provider:'Airtel',due:'2026-08-15'}]},
+  {name:'Nesco',          rent:null,                                                    utility:[{label:'Adani',           months:[0,1940,0,1030,0,0,0,0,0,0,0,0]}],                                                                                                  wifi:[{vendor:'WAY2AIR NET SOLUTION',   due:'2026-07-06'}],                              sim:[]},
+  {name:'Oshiwara',       rent:{tenant:'Sudarshan Daji',            status:'Active',    months:[73500,73500,73500,73500,77200,77200,77200,77200,77200,77200,77200,77200]},   utility:[{label:'Adani (main)',    months:[58490,61570,61490,59480,0,0,0,0,0,0,0,0]},{label:'Adani (Mamledaar)',months:[15710,14930,15730,11960,0,0,0,0,0,0,0,0]}],wifi:[{vendor:'7Sai Net Solution',due:'2026-03-26'}],sim:[{number:'9867609342',provider:'Airtel',due:'2026-07-09'}]},
+  {name:'Powai',          rent:{tenant:'Nitesh & Monali Trivedi',   status:'Active',    months:[105000,105000,105000,105000,105000,105000,105000,105000,115000,115000,115000,115000]},utility:[{label:'Adani',  months:[62890,60330,65550,58800,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'Blue Sky Net Service',   due:'2026-09-11'}],                              sim:[{number:'8369797806',provider:'Vi',due:'2026-06-20'}]},
+  {name:'Pune - Kalyani Nagar',rent:{tenant:'Rahul, Anushka & Neelam Agarwal',status:'Active',months:[66000,66000,66000,66000,66000,66000,66000,66000,66000,66000,67680,68520]},utility:[{label:'Mahavitran',months:[64380,72920,80130,111540,0,0,0,0,0,0,0,0]},{label:'Staffroom',months:[600,460,0,1890,0,0,0,0,0,0,0,0]}],           wifi:[{vendor:'Jio',                    due:'2026-12-06'}],                              sim:[{number:'84465088909',provider:'Airtel',due:'2027-01-06'}]},
+  {name:'Pune - Wakad',   rent:{tenant:'Kamlesh Dhanani',           status:'Active',    months:[0,0,0,35000,35000,35000,35000,35000,35000,35000,35000,35000]},              utility:[{label:'Mahavitran',      months:[0,0,0,1320,0,0,0,0,0,0,0,0]}],                                                                                    wifi:[],                                                                                 sim:[]},
+  {name:'Sakinaka',       rent:{tenant:'Charles Arthur Almeda',     status:'Active',    months:[33600,33600,33600,33600,33600,33600,33600,33600,33600,33600,35280,35280]},   utility:[{label:'Adani',           months:[4060,4870,5780,7020,0,0,0,0,0,0,0,0]}],                                                                           wifi:[{vendor:'DSOUZA Infotainment',    due:'2026-04-22'}],                              sim:[]},
+  {name:'Sion',           rent:{tenant:'Sameer & Vishal Mehta',     status:'Active',    months:[75000,75000,90000,90000,90000,90000,90000,90000,96300,96300,96300,96300]},   utility:[{label:'Best',            months:[39360,42280,37090,39230,0,0,0,0,0,0,0,0]}],                                                                       wifi:[{vendor:'—',                      due:null}],                                      sim:[{number:'9082546381',provider:'JIO',due:'2026-09-17'}]},
+  {name:'Vasant Vihar',   rent:null,                                                    utility:[{label:'Mahavitran',      months:[37310,35970,41780,41130,0,0,0,0,0,0,0,0]}],                                                                                        wifi:[{vendor:'Jitu Net Services',      due:'2026-06-17'}],                              sim:[{number:'9987358909',provider:'Airtel',due:'2027-02-14'}]},
+  {name:'Vashi',          rent:{tenant:'Villayati Ram Mittal',      status:'Active',    months:[63000,63000,63000,63000,63000,64155,66150,66150,66150,66150,66150,66150]},   utility:[{label:'Mahavitran',      months:[58515,52880,52880,60600,57260,0,0,0,0,0,0,0]}],                                                                   wifi:[{vendor:'OneOTT Intertainment',   due:'2026-06-28'}],                              sim:[{number:'7738244046',provider:'Airtel',due:'2027-02-14'}]},
+  {name:'Worli',          rent:{tenant:'Ansari Shaista Usmangani',  status:'Active',    months:[110000,110000,112839,115500,115500,115500,115500,115500,115500,115500,115500,115500]},utility:[{label:'Best (Saisha)',months:[124950,118810,106560,109090,87650,0,0,0,0,0,0,0]}],                                                          wifi:[{vendor:'Arti Cable Vision',      due:'2027-01-28'}],                              sim:[{number:'7977537359',provider:'JIO',due:'2025-11-19'}]},
+];
+
+let sel=null, chartInst=null, atab='overview';
+const INR=n=>n?'₹'+Math.round(n).toLocaleString('en-IN'):'—';
+const fD=s=>{if(!s)return'—';const d=new Date(s);return isNaN(d)?'—':d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
+const dD=s=>{if(!s)return null;const d=new Date(s);return isNaN(d)?null:Math.round((d-new Date())/86400000);};
+const dueBadge=due=>{const d=dD(due);if(d===null)return'<span class="badge bn">—</span>';if(d<0)return`<span class="badge br">Overdue ${Math.abs(d)}d</span>`;if(d<=45)return`<span class="badge ba">Due in ${d}d</span>`;return'<span class="badge bg">OK</span>';};
+const sBadge=s=>{if(!s)return'';if(/active/i.test(s))return'<span class="badge bg">Active</span>';if(/expir/i.test(s))return'<span class="badge br">Expiring</span>';return'<span class="badge ba">Future</span>';};
+
+const getRent =(k,mi)=>k.rent?.months?.[mi]||0;
+const getUtil =(k,mi)=>(k.utility||[]).reduce((s,u)=>s+(u.months?.[mi]||0),0);
+const getWifi =k=>WC[k.name]||0;
+const getSim  =k=>(k.sim||[]).length*300;
+const getTotal=(k,mi)=>getRent(k,mi)+getUtil(k,mi)+getWifi(k)+getSim(k);
+
+function render(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  const mi=+document.getElementById('msel').value;
+  const srt=document.getElementById('ssel').value;
+  const mn=MOF[mi];
+  let kits=DATA.filter(k=>!q||k.name.toLowerCase().includes(q));
+  kits.sort((a,b)=>srt==='d'?getTotal(b,mi)-getTotal(a,mi):srt==='a'?getTotal(a,mi)-getTotal(b,mi):a.name.localeCompare(b.name));
+  const grand=kits.reduce((s,k)=>s+getTotal(k,mi),0);
+  const rentT=kits.reduce((s,k)=>s+getRent(k,mi),0);
+  const utilT=kits.reduce((s,k)=>s+getUtil(k,mi),0);
+  const wsT  =kits.reduce((s,k)=>s+getWifi(k)+getSim(k),0);
+  const maxT =Math.max(...kits.map(k=>getTotal(k,mi)),1);
+
+  document.getElementById('sums').innerHTML=[
+    {l:`${mn} Total`,v:INR(grand),s:`${kits.filter(k=>getTotal(k,mi)>0).length} active kitchens`,c:'#1a1916'},
+    {l:'Rent',v:INR(rentT),s:`${grand?Math.round(rentT/grand*100):0}% of spend`,c:'#2563eb'},
+    {l:'Utilities',v:INR(utilT),s:`${grand?Math.round(utilT/grand*100):0}% of spend`,c:'#059669'},
+    {l:'Wifi + SIM',v:INR(wsT),s:`${grand?Math.round(wsT/grand*100):0}% of spend`,c:'#7c3aed'},
+  ].map(c=>`<div class="sum-card"><div class="sum-lbl">${c.l}</div><div class="sum-val" style="color:${c.c}">${c.v}</div><div class="sum-sub">${c.s}</div></div>`).join('');
+
+  document.getElementById('grid').innerHTML=kits.map(k=>{
+    const tot=getTotal(k,mi),pct=Math.round(tot/maxT*100);
+    const rent=getRent(k,mi),util=getUtil(k,mi),wc=getWifi(k)+getSim(k);
+    return`<div class="kcard${sel===k.name?' sel':''}" onclick="toggle('${k.name.replace(/'/g,"\\'")}')">
+      <div class="kname"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.name}</span>${sBadge(k.rent?.status)}</div>
+      <div class="ktot">${INR(tot)}</div><div class="ksub">${mn}</div>
+      <div class="kbar-wrap"><div class="kbar-bg"><div class="kbar-fill" style="width:${pct}%"></div></div><span style="font-size:10px;color:#9e9b94">${pct}%</span></div>
+      <div class="pills">
+        ${rent?`<span class="pill pill-r">R ${INR(rent)}</span>`:''}
+        ${util?`<span class="pill pill-u">U ${INR(util)}</span>`:''}
+        ${wc?`<span class="pill pill-w">W+S ${INR(wc)}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  if(sel){const k=DATA.find(x=>x.name===sel);if(k)renderDetail(k,mi,mn);}
+}
+
+function toggle(name){
+  sel=sel===name?null:name; atab='overview';
+  if(!sel){document.getElementById('panel').style.display='none';}
+  render();
+  if(sel) setTimeout(()=>document.getElementById('panel').scrollIntoView({behavior:'smooth',block:'start'}),40);
+}
+
+function switchTab(t){
+  atab=t;
+  document.querySelectorAll('.dtab').forEach(el=>el.classList.toggle('on',el.dataset.tab===t));
+  document.querySelectorAll('.tpane').forEach(el=>el.style.display=el.dataset.pane===t?'block':'none');
+}
+
+function utilTbl(k,mi){
+  if(!k.utility?.length||!k.utility.some(u=>u.months.some(v=>v>0))) return '<div class="no-data">No utility data recorded</div>';
+  const rows=k.utility.filter(u=>u.months.some(v=>v>0));
+  const tots=MO.map((_,i)=>rows.reduce((s,r)=>s+(r.months?.[i]||0),0));
+  let h=`<div class="tbl-wrap"><table class="dtbl"><thead><tr><th>Meter/Provider</th>${MO.map((m,i)=>`<th class="${i===mi?'hi':''}">${m}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
+  rows.forEach(r=>{const rT=r.months.reduce((s,v)=>s+v,0);h+=`<tr><td>${r.label||'—'}</td>${r.months.map((v,i)=>`<td class="${i===mi?'hi':''} ${!v?'z':''}">${v?INR(v):'—'}</td>`).join('')}<td>${INR(rT)}</td></tr>`;});
+  h+='</tbody>';
+  if(rows.length>1) h+=`<tfoot><tr><td style="font-family:'DM Sans',sans-serif">Total</td>${tots.map((v,i)=>`<td class="${i===mi?'hi':''}">${v?INR(v):'—'}</td>`).join('')}<td>${INR(tots.reduce((s,v)=>s+v,0))}</td></tr></tfoot>`;
+  return h+'</table></div>';
+}
+
+function rentTbl(k,mi){
+  if(!k.rent) return '<div class="no-data">No rental data</div>';
+  const rT=(k.rent.months||[]).reduce((s,v)=>s+v,0);
+  return`<div class="tbl-wrap"><table class="dtbl"><thead><tr><th>Tenant</th>${MO.map((m,i)=>`<th class="${i===mi?'hi':''}">${m}</th>`).join('')}<th>Total</th></tr></thead><tbody><tr><td>${k.rent.tenant||'—'}</td>${(k.rent.months||Array(12).fill(0)).map((v,i)=>`<td class="${i===mi?'hi':''} ${!v?'z':''}">${v?INR(v):'—'}</td>`).join('')}<td>${INR(rT)}</td></tr></tbody></table></div>`;
+}
+
+function renderDetail(k,mi,mn){
+  const rent=getRent(k,mi),util=getUtil(k,mi),wc=getWifi(k),sc=getSim(k),total=rent+util+wc+sc;
+  const pct=n=>total?Math.round(n/total*100):0;
+  const p=document.getElementById('panel'); p.style.display='block';
+  p.innerHTML=`<div class="panel">
+    <div class="panel-hdr"><h2>${k.name}</h2>${sBadge(k.rent?.status)}<button class="close" onclick="sel=null;document.getElementById('panel').style.display='none';render()">✕</button></div>
+    <div class="dtabs">
+      ${['overview','rent','utility','wifi'].map(t=>`<button class="dtab${t===atab?' on':''}" data-tab="${t}" onclick="switchTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join('')}
+    </div>
+    <div class="dbody">
+      <div class="tpane" data-pane="overview" ${atab!=='overview'?'style="display:none"':''}>
+        <div class="dg">
+          <div>
+            ${k.rent?.tenant?`<div class="erow"><span class="elbl">Tenant</span><span style="font-size:12px;max-width:56%;text-align:right">${k.rent.tenant}</span></div>`:''}
+            <div class="erow"><span class="elbl">${mn} Rent</span><span class="eval">${INR(rent)}</span></div>
+            <div class="erow"><span class="elbl">${mn} Utility</span><span class="eval">${INR(util)}</span></div>
+            <div class="erow"><span class="elbl">Wifi est.</span><span class="eval">${INR(wc)}</span></div>
+            <div class="erow"><span class="elbl">SIM est. (${(k.sim||[]).length} SIM)</span><span class="eval">${INR(sc)}</span></div>
+            <div class="total-line"><span>Total — ${mn}</span><span>${INR(total)}</span></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">
+              ${rent?`<span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#eff6ff;color:#2563eb">Rent ${pct(rent)}%</span>`:''}
+              ${util?`<span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#f0fdf4;color:#059669">Utility ${pct(util)}%</span>`:''}
+              ${wc?`<span style="font-size:11px;padding:3px 8px;border-radius:4px;background:#f3f0ff;color:#7c3aed">Wifi ${pct(wc)}%</span>`:''}
+            </div>
+          </div>
+          <div>
+            <div class="legend">
+              <span><span class="leg-sq" style="background:#2563eb"></span>Rent</span>
+              <span><span class="leg-sq" style="background:#059669"></span>Utility</span>
+              <span><span class="leg-sq" style="background:#7c3aed"></span>Wifi+SIM</span>
+            </div>
+            <div class="chart-wrap"><canvas id="tchart"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div class="tpane" data-pane="rent" ${atab!=='rent'?'style="display:none"':''}>
+        ${k.rent?.tenant?`<div class="erow"><span class="elbl">Tenant</span><span>${k.rent.tenant}</span></div>`:''}
+        ${k.rent?.status?`<div class="erow"><span class="elbl">Status</span>${sBadge(k.rent.status)}</div>`:''}
+        <div style="margin-top:10px">${rentTbl(k,mi)}</div>
+      </div>
+      <div class="tpane" data-pane="utility" ${atab!=='utility'?'style="display:none"':''}>${utilTbl(k,mi)}</div>
+      <div class="tpane" data-pane="wifi" ${atab!=='wifi'?'style="display:none"':''}>
+        <div class="sec-lbl">Wifi / Broadband</div>
+        ${(k.wifi||[]).filter(w=>w.vendor&&w.vendor!=='—').length?(k.wifi||[]).map(w=>`<div class="ws-row"><span style="color:#6b6860">${w.vendor}</span><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:#9e9b94">${fD(w.due)}</span>${dueBadge(w.due)}</div></div>`).join(''):'<div class="no-data">No wifi data</div>'}
+        <div class="sec-lbl" style="margin-top:14px">SIM Recharges</div>
+        ${(k.sim||[]).length?(k.sim||[]).map(s=>`<div class="ws-row"><div><div style="font-weight:500">${s.number}</div><div style="font-size:11px;color:#9e9b94">${s.provider}</div></div><div style="display:flex;align-items:center;gap:7px"><span style="font-size:11px;color:#9e9b94">${fD(s.due)}</span>${dueBadge(s.due)}</div></div>`).join(''):'<div class="no-data">No SIM data</div>'}
+      </div>
+    </div>
+  </div>`;
+
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  setTimeout(()=>{
+    const ctx=document.getElementById('tchart'); if(!ctx)return;
+    const fixed=getWifi(k)+getSim(k);
+    chartInst=new Chart(ctx,{type:'bar',
+      data:{labels:MO,datasets:[
+        {label:'Rent',    data:MO.map((_,i)=>getRent(k,i)),backgroundColor:'#2563eb',stack:'s'},
+        {label:'Utility', data:MO.map((_,i)=>getUtil(k,i)),backgroundColor:'#059669',stack:'s'},
+        {label:'Wifi+SIM',data:MO.map(()=>fixed),backgroundColor:'#7c3aed',stack:'s'},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:9},autoSkip:false,maxRotation:0}},
+          y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:9},callback:v=>'₹'+(v/1000).toFixed(0)+'k'}}}}
+    });
+  },60);
+}
+
+render();
+</script>
